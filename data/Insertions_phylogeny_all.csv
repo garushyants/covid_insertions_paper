@@ -1,0 +1,86 @@
+Position	Length	Insertion	Times	Gene	Confirmed_by_reads	USHER	Mechanism	Origin_position
+3177	15	agaaaaccctcacct	8	ORF1ab		Yes	Template switch	15262
+7125	9	taccagtta	2	ORF1ab		Yes	Possible template switch (complimentary strand)	14095; 11590
+7626	24	ttgtgatacattctgtgctggtag	2	ORF1ab		No	Duplication	
+9622	21	ctcctgtccttcactccccaa	13	ORF1ab		No	Unknown	
+21551	27	actttcgatctcttgtagatctgttct	4	ORF1ab		No	Template switch	34
+21608	12	caactttgagga	2	S		Yes	Unknown	
+22204	9	aaaagaatt	2	S		Yes	Template switch	10857
+22204	9	gcggcaggc	18	S		Yes	Unknown	
+25472	24	ttttgttcgcgctactccttcaga	2	ORF3a		Yes	Duplication	
+27622	9	aacacgtct	2	ORF7a		Yes	Duplication	
+27756	9	aaaactttt	7	ORF7a		Yes	Unknown	
+28272	9	tttctttgg	2			Yes	Unknown	
+28862	12	cagatcagatcg	2	N		No	Unknown	
+29749	9	ataacactt	4			No	Unknown	
+22204	12	gctcaagaaagg	1	S	N			
+690	3	caa	2	ORF1ab	N	Yes		
+3705	3	att	1	ORF1ab	N			
+6930	3	ttt	1	ORF1ab	N			
+9859	3	aag	2	ORF1ab	N	No		
+11074	6	tttttt	1	ORF1ab	N			
+21384	3	ttc	1	ORF1ab	N			
+26078	3	ctt	29	ORF3a	N	No		
+27403	3	ttt	2	ORF7a	N	No		
+27403	6	tttttt	2	ORF7a	N	No		
+27691	3	ttt	2	ORF7a	N	No		
+27906	3	ttt	11	ORF8	N	No		
+27906	6	tttttt	10	ORF8	N	No		
+28242	3	ttt	1	ORF8	N			
+28250	3	ctg	19	ORF8	N	No		
+28987	3	caa	3	N	N	No		
+6403	12	atagcttggaat	2	ORF1ab	Y	Yes	Template switch	22857
+15891	9	ataagcact	1	ORF1ab	Y		Possible template switch (complimentary strand)	3675
+21856	9	aaggctgag	1	S	Y		Unknown	
+22204	12	aagcttggaccg	1	S	Y		Unknown	
+22204	9	acagatcga	27	S	Y	Yes	Unknown	
+22298	12	gagattcgtggg	1	S	Y		Unknown	
+27295	12	taacctagttgc	2	ORF6	Y	Yes	Template switch	18379
+27631	15	aatgtcgcgcattgg	1	ORF7a	Y		Template switch	29216
+28031	9	tatgaatgg	1	ORF8	Y		Unknown	
+29387	24	aaaagaagaaggctgatgaaactc	1	N	Y		Duplication	
+29728	9	gttgttgga	9		Y	Yes	Unknown	
+626	3	ttc	3	ORF1ab	Y	No		
+1813	3	aaa	4	ORF1ab	Y	No		
+3073	3	gaa	9	ORF1ab	Y	No		
+11074	3	ttc	70	ORF1ab	Y	No		
+11074	3	ttt	239	ORF1ab	Y	No		
+13895	3	tga	2	ORF1ab	Y	No		
+16875	3	aca	1	ORF1ab	Y			
+21956	6	aatttc	1	S	Y			
+22083	3	ttt	1	S	Y			
+22320	3	ttc	5	S	Y	No		
+23120	6	caccac	1	S	Y			
+25691	3	cct	4	ORF3a	Y	No		
+25699	3	ccc	26	ORF3a	Y	No		
+25703	3	ccc	154	ORF3a	Y	No		
+25757	3	aat	47	ORF3a	Y	No		
+26492	3	tta	4		Y	No		
+27247	3	taa	2	ORF6	Y	No		
+27380	3	tgt	1	ORF6	Y			
+28934	3	tgc	1	N	Y			
+29389	3	aag	1	N	Y			
+29451	3	tct	7	N	Y	No		
+7084	6	aatggg	2	ORF1ab		Yes		
+11427	3	tta	9	ORF1ab		Yes		
+21569	3	ttt	18	S		No		
+21572	3	ttt	5	S		No		
+21761	3	gtt	3	S		Yes		
+21770	6	tacatg	3	S		No		
+21819	6	accatt	4	S		No		
+21819	6	taatga	2	S		Yes		
+22003	3	aac	2	S		Yes		
+22353	3	tta	3	S		No		
+23120	3	cac	27	S		No		
+23120	6	cagcac	17	S		No		
+23122	3	cct	8	S		No		
+23583	6	tcagac	2	S		Yes		
+23933	3	cac	2	S		Yes		
+25472	3	ttt	4	ORF3a		No		
+25691	3	tga	5	ORF3a		No		
+25882	3	ctt	14	ORF3a		No		
+27249	3	att	6	ORF6		Yes		
+27791	3	ttt	4	ORF7b		Yes		
+28254	3	tca	26	ORF8		Yes		
+28254	3	tcc	2	ORF8		No		
+29764	3	tgt	2			Yes		
