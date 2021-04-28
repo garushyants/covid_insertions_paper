@@ -126,25 +126,32 @@ names(Threemulpl_insertions)<-c("Position","Length","Insertion", "Times", "xmin"
 Threemulpl_insertions$Position[Threemulpl_insertions$Position == 28028]<-28031
 
 #Read data about monophyly and mechanisms
-PhylogenyInsertions<-read.csv("../data/Insertions_phylogeny_long.csv", sep ="\t", header = T,
+PhylogenyInsertions<-read.csv("../data/Insertions_phylogeny_all.csv", sep ="\t", header = T,
                               stringsAsFactors = F)
 
 #Merge dataframes and add statuses
 Insertions_plotting_merged<-merge(Threemulpl_insertions,PhylogenyInsertions, all=T)
 
 Insertions_plotting_merged[is.na(Insertions_plotting_merged)]<-""
-Insertions_plotting_merged$Fill<-ifelse(Insertions_plotting_merged$Confirmed_by_reads_or_multiple == "Y",
+
+###Remove insertions that were not confirmed by reads
+Insertions_plotting_merged_f<-subset(Insertions_plotting_merged, Insertions_plotting_merged$Confirmed_by_reads !="N")
+
+Insertions_plotting_merged_f$Fill<-ifelse(Insertions_plotting_merged_f$Confirmed_by_reads == "Y",
                                         "Confirmed by reads", 
-                                        ifelse(Insertions_plotting_merged$USHER == "Yes",
+                                        ifelse(Insertions_plotting_merged_f$USHER == "Yes",
                                                "Monophyletic",
-                                               ifelse(Insertions_plotting_merged$fill == "Multi", "Multiple genomes", "Singleton")))
-Insertions_plotting_merged$Length2<-ifelse(Insertions_plotting_merged$Length < 30, 
-                                           Insertions_plotting_merged$Length, 35)
+                                               ifelse(Insertions_plotting_merged_f$fill == "Multi", "Multiple genomes", "Singleton")))
+Insertions_plotting_merged_f$Length2<-ifelse(Insertions_plotting_merged_f$Length < 30, 
+                                           Insertions_plotting_merged_f$Length, 35)
+# ####
+# #export final table
+# write.table(Insertions_plotting_merged_f, "./Inserts_141_all_features_export.csv", row.names = F, sep = "\t")
 
 ##############Plot insertions
 
 #Plot length distribution (Figure 1a)
-Insertions_length_distribution<- ggplot(data=Insertions_plotting_merged)+
+Insertions_length_distribution<- ggplot(data=Insertions_plotting_merged_f)+
   geom_bar(aes(x = Length,y = ..count..),
            fill = "#08306b")+
   theme_classic()+
@@ -156,7 +163,7 @@ Insertions_length_distribution<- ggplot(data=Insertions_plotting_merged)+
 Insertions_length_distribution
 
 #Plot inserts distribution along genome (Figure 1b)
-ThreemulInsertionsPlot<-ggplot(data=Insertions_plotting_merged)+
+ThreemulInsertionsPlot<-ggplot(data=Insertions_plotting_merged_f)+
   geom_vline(aes(xintercept = Position), linetype = "dashed", color = "#d9d9d9",
              alpha=0.8)+
   geom_jitter(aes(x = Position,
@@ -184,12 +191,12 @@ ThreemulInsertionsPlot
 #######Calculate nucleotide composition
 
 #Subset inserts of the length 3
-Three_insertions<-subset(Insertions_plotting_merged, Insertions_plotting_merged$Length < 4)
+Three_insertions<-subset(Insertions_plotting_merged_f, Insertions_plotting_merged_f$Length < 4)
 #Subset inserts of the length 6
-Six_insertions<-subset(Insertions_plotting_merged, Insertions_plotting_merged$Length == 6)
+Six_insertions<-subset(Insertions_plotting_merged_f, Insertions_plotting_merged_f$Length == 6)
 ##################################
 #Subset long insertions
-Long_insertions<-subset(Insertions_plotting_merged, Insertions_plotting_merged$Length > 8)
+Long_insertions<-subset(Insertions_plotting_merged_f, Insertions_plotting_merged_f$Length > 8)
 #############################
 #Calculate nucleotide composition
 nucl_composition<- function(df) {
@@ -209,13 +216,14 @@ Long_ins_nuc_counts<-nucl_composition(Long_insertions)
 #Information for the whole genome is precalculated from the reference strain
 Whole<-c(0,8954,9594,5863,5492)
 ##Merge results into dataframe
-ATGC_countsDF<-as.data.frame(t(data.frame(Three_ins_nuc_counts,Six_ins_nuc_counts,Long_ins_nuc_counts, Whole)))
+ATGC_countsDF<-as.data.frame(t(data.frame(Three_ins_nuc_counts,
+                                          Six_ins_nuc_counts,Long_ins_nuc_counts, Whole)))
 
 data<-ATGC_countsDF[,2:5]
 ATGC_portionsDF<-as.data.frame(t(apply(data,1, function(x) x*100/sum(x))))
 ATGC_portionsDF$length<-factor(c("3 nucl","6 nucl","> 8 nucl","genome"),
-                               levels = c("3 nucl","6 nucl","> 8 nucl","genome"))
-ATGC_portion_melted<-melt(ATGC_portionsDF, id = "length")
+                               levels = c("Short c","3 nucl","6 nucl","> 8 nucl","genome"))
+ATGC_portion_melted<-reshape2::melt(ATGC_portionsDF, id = "length")
 
 ##Plot results
 NucleotidesCounts<-ggplot(data=ATGC_portion_melted, aes(x =length,y = value, fill=variable))+
@@ -228,6 +236,72 @@ NucleotidesCounts<-ggplot(data=ATGC_portion_melted, aes(x =length,y = value, fil
   theme(axis.text = element_text(size =10),
         plot.margin=unit(c(0.3,1,0.3,1), "cm"))
 NucleotidesCounts
+
+####Supplementary figure
+#Same as Fig1b but only for experimentally verified
+ExperimentallyVerified<-subset(Insertions_plotting_merged_f, 
+                               Insertions_plotting_merged_f$Fill == "Confirmed by reads")
+Three_insertions_e<-subset(ExperimentallyVerified, ExperimentallyVerified$Length < 4)
+Six_insertions_e<-subset(ExperimentallyVerified, ExperimentallyVerified$Length == 6)
+Long_insertions_e<-subset(ExperimentallyVerified, ExperimentallyVerified$Length > 8)
+
+Three_ins_nuc_counts_e<-nucl_composition(Three_insertions_e)
+Six_ins_nuc_counts_e<-nucl_composition(Six_insertions_e)
+Long_ins_nuc_counts_e<-nucl_composition(Long_insertions_e)
+
+ATGC_countsDF_e<-as.data.frame(t(data.frame(Three_ins_nuc_counts_e,
+                                          Six_ins_nuc_counts_e,Long_ins_nuc_counts_e, Whole)))
+
+data_e<-ATGC_countsDF_e[,2:5]
+ATGC_portionsDF_e<-as.data.frame(t(apply(data_e,1, function(x) x*100/sum(x))))
+ATGC_portionsDF_e$length<-factor(c("3 nucl","6 nucl","> 8 nucl","genome"),
+                               levels = c("Short c","3 nucl","6 nucl","> 8 nucl","genome"))
+ATGC_portion_e_melted<-reshape2::melt(ATGC_portionsDF_e, id = "length")
+
+#
+NucleotidesCounts_e<-ggplot(data=ATGC_portion_e_melted, aes(x =length,y = value, fill=variable))+
+  geom_bar(stat="identity",position=position_dodge(), color = "black", size =0.1)+
+  scale_fill_manual(name = "Nucleotide", labels = c("A","T","G","C"),
+                    values = c("#4daf4a","#e41a1c","#fecc5c","#377eb8"))+
+  ylab("%")+
+  xlab("")+
+  theme_classic()+
+  theme(axis.text = element_text(size =10),
+        plot.margin=unit(c(0.3,1,0.3,1), "cm"))
+NucleotidesCounts_e
+
+#GC content in all inserts + PRRA
+#Add PRRA to dataset
+PRRA<-data_frame(Length = 12, Insertion = "cctcggcgggca", Fill = "PRRA")
+
+SupplementaryNucCount<-Insertions_plotting_merged_f[,c("Length", "Insertion", "Fill")]
+SupplementaryNucCountPRRA<-rbind(SupplementaryNucCount, PRRA)
+SupplementaryNucCountPRRA$Length2<-ifelse((SupplementaryNucCountPRRA$Length > 8), "long",SupplementaryNucCountPRRA$Length)
+
+SupplementaryNucCountPRRA$GC <- str_count(SupplementaryNucCountPRRA$Insertion,"g") +
+  str_count(SupplementaryNucCountPRRA$Insertion,"c")
+SupplementaryNucCountPRRA$AT <- str_count(SupplementaryNucCountPRRA$Insertion,"a") +
+  str_count(SupplementaryNucCountPRRA$Insertion,"t")
+SupplementaryNucCountPRRA$GCp <- SupplementaryNucCountPRRA$GC*100/(SupplementaryNucCountPRRA$GC +
+                                                                     SupplementaryNucCountPRRA$AT)
+
+Sup_GC_content<-ggplot(data = SupplementaryNucCountPRRA)+
+  geom_histogram(aes(y=GCp,
+                     fill = Fill))+
+  facet_wrap(~Length2, scales = 'free_x', ncol =3)+
+  scale_fill_manual(values = c("#00441b","#41ab5d", "#c7e9c0", "#3182bd","#bababa"))+
+  ylab("% GC")+
+  theme_bw()+
+  theme(legend.position = "top")
+Sup_GC_content
+
+SupFigure1<-ggarrange(NucleotidesCounts_e,
+                      Sup_GC_content,
+                      ncol =1,
+                      labels = c("a","b"))
+SupFigure1
+ggsave("../figures/Supplementary_Figure1.svg", plot= SupFigure1,
+       width = 18, height = 18, dpi =300, units ="cm")
 
 #########################################################
 #########################################################
@@ -264,22 +338,47 @@ kimdata_bins$bin_num<-as.numeric(kimdata_bins$bin)*100
 
 ###Precalculated data from Huston et al., 2021
 
-WellFolded<-read.csv("../data/external/well_folded_regions_Huston_v2.csv",header =T, sep ='\t')
+Structure_Huston<-read.csv("../data/external/SARS-CoV-2_Full_Length_Secondary_Structure_Map.ct",header =F, sep ="")[-1,]
+Structure_Huston$stem<-ifelse(Structure_Huston$V5 != 0, "stem", "loop")
 
-foldtop<-WellFolded[,c("X","intervals","idx")] %>% group_by(intervals) %>% top_n(1,X)
-foldbottom<-WellFolded[,c("X","intervals","idx")] %>% group_by(intervals) %>% top_n(-1,X)
+intcount<-0
+intID<-c(0)
+for (i in 2:nrow(Structure_Huston)) {
+  if(Structure_Huston[i-1,7] == "loop") {
+    if (Structure_Huston[i,7] == "loop") {
+      intID<-c(intID,0)
+    }
+    else {
+      intcount<-intcount +1
+      intID<-c(intID,intcount)
+    }
+  }
+  else {
+    if (Structure_Huston[i,7] == "stem") {
+      intID<-c(intID,intcount)
+    }
+    else {
+      intID<-c(intID,0)
+    }
+  }
+}
+Structure_Huston$intID<-intID
+####################
+
+foldtop<-Structure_Huston[,c("V6","stem","intID")] %>% filter(intID >0) %>% group_by(intID) %>% top_n(1,V6)
+foldbottom<-Structure_Huston[,c("V6","stem","intID")] %>% filter(intID >0) %>% group_by(intID) %>% top_n(-1,V6)
 #
-foldplotting<-merge(foldbottom, foldtop, by= c('intervals','idx'))
+foldplotting<-merge(foldbottom, foldtop, by= c('intID','stem'))
 
 ##Plot both datasets together (Figure 1c)
 RNAstrAndsgRNAs_together<-ggplot(data=foldplotting)+
-  geom_rect(aes(xmin=X.x,
-                xmax=X.y,
-                ymin=0,
-                ymax= 16, 
-                fill = ""),
-            alpha =0.8,
-            size =0.1)+
+  # geom_rect(aes(xmin=V6.x,
+  #               xmax=V6.y,
+  #               ymin=0,
+  #               ymax= 16, 
+  #               fill = ""),
+  #           alpha =0.8,
+  #           size =0.1)+
   geom_line(data=kimdata_bins,
             aes(x = bin_num,
                 y = logcount,
@@ -288,7 +387,7 @@ RNAstrAndsgRNAs_together<-ggplot(data=foldplotting)+
   scale_x_continuous(expand = c(0.01, 0),limits = c(0,30000),breaks=seq(0,30000,2000), name ="")+
   scale_y_continuous(expand = c(0.01, 0), name = "log(read count)")+
   scale_colour_brewer(palette="Dark2", name = "Kim et al., 2020", labels = c("5' end", "3' end"))+
-  scale_fill_manual(values = c("#ffeda0"), name = "Huston et al., 2021" , labels = c("well-folded region"))+
+  #scale_fill_manual(values = c("#ffeda0"), name = "Huston et al., 2021" , labels = c("paired bases"))+
   theme_classic()
 RNAstrAndsgRNAs_together
 
@@ -296,7 +395,7 @@ RNAstrAndsgRNAs_together
 #Calculate correlation
 
 #Bin all insertions
-All_ins<-Insertions_plotting_merged[1:4]
+All_ins<-Insertions_plotting_merged_f[1:4]
 All_ins<-transform(All_ins, bin = cut(Position, breaks = intervals,
                                       labels = intervals[2:length(intervals)]))
 Ins_bins_pre<- All_ins %>% group_by(bin) %>% summarise(count = n())
@@ -306,19 +405,179 @@ Ins_bins[is.na(Ins_bins)]<- 0
 #Kimdata is already in bins: kimdata_bins
 kimdata_bins_three<-subset(kimdata_bins, kimdata_bins$variable == "three")
 
+#Bin well-structured regions
+
 #correlation
 cor.test(Ins_bins$count,kimdata_bins_three$totVal)
 
+##################
+####Distance to the closest junction
+AllJunctions<-unique(sort(kimdata_melted[,"value"]))
+Insertions_All<-Insertions_plotting_merged_f[,1]
+
+#Real data
+ClosestJunction<-sapply(Insertions_All, function(Insertions_All, AllJunctions) {
+  AllJunctions[which.min(abs(Insertions_All-AllJunctions))]}, AllJunctions)
+DistanceRealData<-abs(Insertions_All-ClosestJunction)
+
+#Simulated data
+SimulationDistanceToJuction<-vector()
+for (j in seq(1,1000)){
+  InsPos<-floor(runif(length(Insertions_All),min=1, max = 29903))
+  Closest<-sapply(InsPos, function(InsPos, AllJunctions) {
+    AllJunctions[which.min(abs(InsPos-AllJunctions))]}, AllJunctions)
+  Dist<-abs(InsPos-Closest)
+  SimulationDistanceToJuction<-c(SimulationDistanceToJuction,Dist)
+}
+
+#pvalue
+wilcox.test(DistanceRealData,SimulationDistanceToJuction)
+#plot distance to closest junction
+DistanceToJunction<-ggplot()+
+  geom_histogram(aes(DistanceRealData,
+                    after_stat(count*100/sum(count))),
+                fill = "#41ae76",
+                binwidth =5,
+                size=1)+
+  geom_histogram(aes(SimulationDistanceToJuction,
+                    after_stat(count*100/sum(count))),
+                fill = "#525252",
+                binwidth = 5, alpha =0.7)+
+  annotate("text", x=250, y=10.0,label = "p-value == 1.1^-{12}", parse =T)+
+  scale_x_continuous(expand = c(0.01, 0),name ="distance to closest junction (nt)",
+                     limits=c(-5,1000))+
+  scale_y_continuous(expand = c(0.01, 0), name = "%")+
+  theme_classic()+
+  theme(axis.text = element_text(size =10),
+        plot.margin=unit(c(0.3,0.5,0.3,0.2), "cm"))
+DistanceToJunction
+
+####Whether insertion is in stem or in loop
+
+countStems<-function(InsList) {
+  stemcount<-0
+  for(elem in InsList) {
+    checkdf<-subset(foldplotting,
+                    foldplotting$V6.x <= elem &
+                      foldplotting$V6.y >= elem)
+    stemcount<-stemcount +nrow(checkdf)
+  }
+  return(stemcount)
+}
+#Real data in loops
+StemsRealData<-countStems(Insertions_All)
+
+#Simulation
+SimulationStems<-vector()
+for (j in seq(1,1000)){
+  InsPos<-floor(runif(length(Insertions_All),min=1, max = 29903))
+  SimulationStems<-c(SimulationStems, countStems(InsPos))
+}
+
+#p-value
+pvalueStems<-length(SimulationStems[SimulationStems < StemsRealData])/1000
+#plot
+InsertionsInStemsPlot<-ggplot()+
+  geom_histogram(aes(SimulationStems,
+                 after_stat(count*100/sum(count))),
+                 fill = "#525252",
+                 binwidth = 1, alpha =0.5)+
+  geom_vline(xintercept =StemsRealData, color = "#2b8cbe",size=2)+
+  scale_x_continuous(expand = c(0.01, 0),name ="Number of insertions in stems")+
+  scale_y_continuous(expand = c(0.01, 0), name = "%")+
+  annotate("text", x=70, y=5.7,label = paste("p-value = ",pvalueStems))+
+  theme_classic()+
+  theme(axis.text = element_text(size =10),
+        plot.margin=unit(c(0.3,0.2,0.3,0.2), "cm"))
+InsertionsInStemsPlot
+
+###Supplementary Figure 4
+#Same as 1e and 1f but for 56 high-confident inserts
+HighlyConfidentInserts<-subset(Insertions_plotting_merged_f, (Insertions_plotting_merged_f$Length <7 &
+                                                                Insertions_plotting_merged_f$Confirmed_by_reads == "Y") |
+                                 (Insertions_plotting_merged_f$Length > 8 &
+                                    Insertions_plotting_merged_f$Fill != "Singleton"))
+Insertions_All_HC<-HighlyConfidentInserts[,1]
+
+ClosestJunction_HC<-sapply(Insertions_All_HC, function(Insertions_All_HC, AllJunctions) {
+  AllJunctions[which.min(abs(Insertions_All_HC-AllJunctions))]}, AllJunctions)
+DistanceRealData_HC<-abs(Insertions_All_HC-ClosestJunction)
+
+#Simulation
+SimulationDistanceToJuction_HC<-vector()
+for (j in seq(1,1000)){
+  InsPos<-floor(runif(length(Insertions_All_HC),min=1, max = 29903))
+  Closest<-sapply(InsPos, function(InsPos, AllJunctions) {
+    AllJunctions[which.min(abs(InsPos-AllJunctions))]}, AllJunctions)
+  Dist<-abs(InsPos-Closest)
+  SimulationDistanceToJuction_HC<-c(SimulationDistanceToJuction_HC,Dist)
+}
+wilcox.test(DistanceRealData_HC,SimulationDistanceToJuction_HC)
+#plot distance to closest junction
+DistanceToJunction_HC<-ggplot()+
+  geom_histogram(aes(DistanceRealData_HC,
+                     after_stat(count*100/sum(count))),
+                 fill = "#41ae76",
+                 binwidth =5,
+                 size=1)+
+  geom_histogram(aes(SimulationDistanceToJuction_HC,
+                     after_stat(count*100/sum(count))),
+                 fill = "#525252",
+                 binwidth = 5, alpha =0.7)+
+  annotate("text", x=250, y=10.0,label = "p-value == 8.7^-{5}", parse =T)+
+  scale_x_continuous(expand = c(0.01, 0),name ="distance to closest junction (nt)",
+                     limits=c(-5,1000))+
+  scale_y_continuous(expand = c(0.01, 0), name = "%")+
+  theme_classic()+
+  theme(axis.text = element_text(size =10),
+        plot.margin=unit(c(0.3,0.5,0.3,0.2), "cm"))
+DistanceToJunction_HC
+
+##
+StemsRealData_HC<-countStems(Insertions_All_HC)
+
+#Simulation
+SimulationStems_HC<-vector()
+for (j in seq(1,1000)){
+  InsPos<-floor(runif(length(Insertions_All_HC),min=1, max = 29903))
+  SimulationStems_HC<-c(SimulationStems_HC, countStems(InsPos))
+}
+
+#p-value
+pvalueStems_HC<-length(SimulationStems_HC[SimulationStems_HC < StemsRealData_HC])/1000
+#plot
+InsertionsInStemsPlot_HC<-ggplot()+
+  geom_histogram(aes(SimulationStems_HC,
+                     after_stat(count*100/sum(count))),
+                 fill = "#525252",
+                 binwidth = 1, alpha =0.5)+
+  geom_vline(xintercept =StemsRealData_HC, color = "#2b8cbe",size=2)+
+  scale_x_continuous(expand = c(0.01, 0),name ="Number of insertions in stems")+
+  scale_y_continuous(expand = c(0.01, 0), name = "%")+
+  annotate("text", x=20, y=5.7,label = paste("p-value = ",pvalueStems_HC))+
+  theme_classic()+
+  theme(axis.text = element_text(size =10),
+        plot.margin=unit(c(0.3,0.2,0.3,0.2), "cm"))
+InsertionsInStemsPlot_HC
+
+SupplFig4<-ggarrange(DistanceToJunction_HC,
+                     InsertionsInStemsPlot_HC,
+                     ncol =2,
+                     labels = c("a","b"))
+SupplFig4
+
+ggsave("../figures/Supplementary_Figure4.svg", plot= SupplFig4,
+       width = 28, height = 15, dpi =300, units ="cm")
 #################################
 ###Build whole Figure 1
 #middle aligned panel
-Figure1_middle<-ggarrange(SARSCoVGenome,
+Figure1_bottom<-ggarrange(SARSCoVGenome,
                         ThreemulInsertionsPlot,
                         RNAstrAndsgRNAs_together,
                         ncol =1,
                         align = "v",
-                        labels = c("b","","c"),
-                        heights = c(0.5,1,0.4),
+                        labels = c("c","","d"),
+                        heights = c(0.55,1,0.4),
                         common.legend = F,
                         legend = "right")
 #Build top and bottom parts
@@ -326,20 +585,26 @@ Figure1_top<-ggarrange(NULL,Insertions_length_distribution, NULL,
                        labels=c("a","",""),
                        ncol = 3,
                        widths = c(0.1,1,0.25))
-Figure1_bottom<-ggarrange(NULL,NucleotidesCounts, NULL,
+Figure1_middle<-ggarrange(NULL,NucleotidesCounts,NULL,
                           ncol =3,
-                          widths = c(0.5,1,0.5),
-                          labels = c("","d",""))
+                          widths = c(0.3,1,0.3),
+                          labels = c("","b",""))
+Figure1_Simulations<-ggarrange(DistanceToJunction,
+                               InsertionsInStemsPlot,
+                               ncol =2,
+                               widths = c(1, 0.6),
+                               labels = c("e","f"))
 #Combine all in one figure
 Figure1_full<-ggarrange(Figure1_top,
                         Figure1_middle,
                         Figure1_bottom,
+                        Figure1_Simulations,
                         ncol =1,
-                        heights = c(0.3,1,0.25))
+                        heights = c(0.3,0.25, 1, 0.3))
 Figure1_full
 #Save figure
 ggsave("../figures/Figure1.svg", plot= Figure1_full,
-       width = 26, height = 31, dpi =300, units ="cm")
+       width = 26, height = 34.5, dpi =600, units ="cm")
 
 
 ###############################
@@ -375,14 +640,14 @@ Mechanism_plot<-ggplot(data=Mechanism_plotDf)+
   geom_curve(data = subset(Mechanism_plotDf, Mechanism_plotDf$Origin_position !="") %>% 
                filter(as.numeric(Origin_position) < Position),
              aes(xend= Position, y = num-0.5, x = as.numeric(Origin_position), 
-                 yend = num-0.5, color = Mechanism.Igor.),
+                 yend = num-0.5, color = Mechanism),
              curvature = -0.4,
              lineend = "square",
              arrow = arrow(length = unit(0.1,"cm")))+
   geom_curve(data = subset(Mechanism_plotDf, Mechanism_plotDf$Origin_position !="") %>% 
                filter(as.numeric(Origin_position) > Position),
              aes(xend= Position, y = num-0.5, x = as.numeric(Origin_position), 
-                 yend = num-0.5, color = Mechanism.Igor.),
+                 yend = num-0.5, color = Mechanism),
              curvature = 0.4,
              lineend = "square",
              arrow = arrow(length = unit(0.1,"cm")))+
@@ -571,9 +836,9 @@ Permutations_both<-ggplot() +
         axis.title.x= element_blank())
 
 #############
-#Build Figure 3
+#Build Figure 2
 
-Figure3_top<-ggarrange(Mechanism_plot,
+Figure2_top<-ggarrange(Mechanism_plot,
                        SARSCoVGenome_plain,
                        supporting_reads_plot,
                        ncol =1,
@@ -581,19 +846,19 @@ Figure3_top<-ggarrange(Mechanism_plot,
                        heights = c(0.5,0.1,0.55),
                        common.legend = T,
                        legend = "top")
-Figure3_bottom<-ggarrange(NULL, Permutations_one, NULL, Permutations_both, NULL,
+Figure2_bottom<-ggarrange(NULL, Permutations_one, NULL, Permutations_both, NULL,
                                 widths = c(0.3,1, 0.25, 1,0.3),
                                 ncol = 5,
                                 labels = c("","b","","c",""))
-Figure3_full<-ggarrange(Figure3_top,
-          Figure3_bottom,
+Figure2_full<-ggarrange(Figure2_top,
+          Figure2_bottom,
           labels=c("a",""),
           heights = c(1,0.3),
           ncol =1)
-Figure3_full
+Figure2_full
 
 #Save Figure
-ggsave("../figures/Figure3.svg", plot= Figure3_full,
+ggsave("../figures/Figure2.svg", plot= Figure2_full,
        width = 30, height = 20, dpi =300, units ="cm")
 
 
