@@ -7,7 +7,7 @@ from bisect import bisect_left
 
 #Options
 parser=optparse.OptionParser()
-parser.add_option('-i', '--infile', default = "/home/garushyants/sars_cov2_nih/GISAID_long_insertions_Feb12/GISAID_long_insertions_aligned_mod.fasta",help='input alignment in fasta format', type='str')
+parser.add_option('-i', '--infile', default = "",help='input alignment in fasta format', type='str')
 parser.add_option('-r', '--reference', default= 'NC_045512.2', help='reference sequence ID', type='str')
 parser.add_option('-o', '--outfile', default= 'out.csv', help='name of the output file with insertions', type='str')
 
@@ -16,7 +16,7 @@ alignmentFile = options.infile
 refseq_name = options.reference
 outfile = options.outfile
 
-AnnotationFile = "NC_045512.2.gff3"
+AnnotationFile = "../data/NC_045512.2.gff3"
 allowedLetters = ["a","t","g","c"]
 
 ##
