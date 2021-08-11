@@ -90,29 +90,8 @@ SARSCoVGenome_plain
 ########################################################
 ########################################################
 #######Read insertions data
-# #Read insertions info
-# GISAIDins<-read.csv("../data/GISAID_full_msa.insertions.out.csv", sep = "\t",
-#                     header = F)
-# #Exclude sequences with multiple insertions
-# FilterDfCounts<-GISAIDins%>% group_by(V1) %>% count()
-# FilterDf<-subset(FilterDfCounts, FilterDfCounts$n <3)
-# GISAIDins_noMulti<-subset(GISAIDins,GISAIDins$V1 %in% FilterDf$V1)
-# 
-# #filter all non ATGC
-# INS_ATGC<-subset(GISAIDins_noMulti, grepl("^(a|t|g|c)+$",GISAIDins_noMulti$V5))
-# length(unique(INS_ATGC$V1))
-# 
-# # INS_ATGC_Save<-subset(INS_ATGC, INS_ATGC$V4 %% 3 == 0)
-# # ####
-# # #Save output
-# # write.table(INS_ATGC_Save,"../data/GISAID_full_msa_insertions_filtered.csv", row.names = F, sep = "\t")
-# 
-# ##Extract insertion events
-# GISAIDins_noN_counts<-INS_ATGC %>% group_by(V2,V3,V4,V5) %>% count()
 
-#Read inserts info after filration and annotation
-#The same data provided in Supplementary table 2
-Insertions_for_plotting<-read.csv("../data/Inserts_msa0617_phylogeny_all.csv",
+Insertions_for_plotting<-read.csv("../data/Inserts_msa0617_phylogeny_all.tsv",
                                   header = T, sep ="\t")
 
 #And prepare data for plotting
@@ -124,22 +103,6 @@ Insertions_noN_for_plotting$fill<-ifelse(Insertions_noN_for_plotting$Times == 1,
 #Calculate the multiplication
 Insertions_noN_for_plotting$multi<-Insertions_noN_for_plotting$Length%%3
 
-# #Subset only those that multiply by 3
-# Threemulpl_insertions<-subset(Insertions_noN_for_plotting, Insertions_noN_for_plotting$multi ==0)
-# names(Threemulpl_insertions)<-c("Position","Length","Insertion", "Times", "xmin","xmax","fill","multi")
-# #correct wrong position in one case
-# Threemulpl_insertions$Position[Threemulpl_insertions$Position == 28028]<-28031
-
-# #Read data about monophyly and mechanisms
-# PhylogenyInsertions<-read.csv("../data/Insertions_phylogeny_all.csv", sep ="\t", header = T,
-#                               stringsAsFactors = F)
-# 
-# #Merge dataframes and add statuses
-# Insertions_plotting_merged<-merge(Threemulpl_insertions,PhylogenyInsertions, all=T)
-# 
-# Insertions_plotting_merged[is.na(Insertions_plotting_merged)]<-""
-
-###Remove insertions that were not confirmed by reads
 Insertions_plotting_merged_f<-subset(Insertions_noN_for_plotting, Insertions_noN_for_plotting$Confirmed_by_reads !="N")
 
 Insertions_plotting_merged_f$Fill<-ifelse(Insertions_plotting_merged_f$Confirmed_by_reads == "Y",
