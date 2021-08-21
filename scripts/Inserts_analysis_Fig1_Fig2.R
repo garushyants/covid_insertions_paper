@@ -196,7 +196,7 @@ ATGC_portion_melted<-reshape2::melt(ATGC_portionsDF, id = "length")
 ##Plot results
 NucleotidesCounts<-ggplot(data=ATGC_portion_melted, aes(x =length,y = value, fill=variable))+
   geom_bar(stat="identity",position=position_dodge(), color = "black", size =0.1)+
-  scale_fill_manual(name = "Nucleotide", labels = c("A","T","G","C"),
+  scale_fill_manual(name = "Nucleotide", labels = c("A","U","G","C"),
                     values = c("#4daf4a","#e41a1c","#fecc5c","#377eb8"))+
   ylab("%")+
   xlab("")+
@@ -229,7 +229,7 @@ ATGC_portion_e_melted<-reshape2::melt(ATGC_portionsDF_e, id = "length")
 #
 NucleotidesCounts_e<-ggplot(data=ATGC_portion_e_melted, aes(x =length,y = value, fill=variable))+
   geom_bar(stat="identity",position=position_dodge(), color = "black", size =0.1)+
-  scale_fill_manual(name = "Nucleotide", labels = c("A","T","G","C"),
+  scale_fill_manual(name = "Nucleotide", labels = c("A","U","G","C"),
                     values = c("#4daf4a","#e41a1c","#fecc5c","#377eb8"))+
   ylab("%")+
   xlab("")+
@@ -306,6 +306,16 @@ kimdata_bins$logcount<-log(kimdata_bins$totVal)
 kimdata_bins[is.na(kimdata_bins)]<- 0
 kimdata_bins$bin_num<-as.numeric(kimdata_bins$bin)*100
 
+
+##simplified version of data for revision (2 rows below)
+kimdata_bins_pre_smpl<-kimdata_melted %>% group_by(bin) %>% summarise(totVal=sum(count))
+kimdata_bins_smpl<-merge(kimdata_bins_pre_smpl, groups_cut2, all = TRUE)
+kimdata_bins_smpl$logcount<-log(kimdata_bins_smpl$totVal)
+kimdata_bins_smpl[is.na(kimdata_bins_smpl)]<- 0
+kimdata_bins_smpl$bin_num<-as.numeric(kimdata_bins_smpl$bin)*100
+
+
+
 ###Precalculated data from Huston et al., 2021
 
 Structure_Huston<-read.csv("../data/external/SARS-CoV-2_Full_Length_Secondary_Structure_Map.ct",header =F, sep ="")[-1,]
@@ -349,14 +359,14 @@ RNAstrAndsgRNAs_together<-ggplot(data=foldplotting)+
   #               fill = ""),
   #           alpha =0.8,
   #           size =0.1)+
-  geom_line(data=kimdata_bins,
+  geom_line(data=kimdata_bins_smpl,
             aes(x = bin_num,
                 y = logcount,
                 colour = variable),
             size =1)+
   scale_x_continuous(expand = c(0.01, 0),limits = c(0,30000),breaks=seq(0,30000,2000), name ="")+
   scale_y_continuous(expand = c(0.01, 0), name = "log(read count)")+
-  scale_colour_brewer(palette="Dark2", name = "Kim et al., 2020", labels = c("5' end", "3' end"))+
+  scale_colour_brewer(palette="Dark2", name = "Kim et al., 2020", labels = c("reads"))+
   #scale_fill_manual(values = c("#ffeda0"), name = "Huston et al., 2021" , labels = c("paired bases"))+
   theme_classic()
 RNAstrAndsgRNAs_together
@@ -372,15 +382,15 @@ Ins_bins_pre<- All_ins %>% group_by(bin) %>% summarise(count = n())
 Ins_bins<-merge(Ins_bins_pre, groups_cut1[,c(1)], all = TRUE)
 Ins_bins[is.na(Ins_bins)]<- 0
 
-#Kimdata is already in bins: kimdata_bins
+##Kimdata is already in bins: kimdata_bins
 kimdata_bins_three<-subset(kimdata_bins, kimdata_bins$variable == "three")
 
 #Bin well-structured regions
 
 #correlation
 cor.test(Ins_bins$count,kimdata_bins_three$totVal)
-#t = 8.5927, df = 297, p-value = 4.909e-16
-#cor = 0.4462117
+#t = 8.0604, df = 297, p-value = 1.876e-16
+#cor = 0.4236626
 
 ##################
 ####Distance to the closest junction
@@ -598,7 +608,7 @@ Mechanism_plot<-ggplot(data=Mechanism_plotDf)+
              shape = 25,
              color = "black",
              alpha =0.7)+
-  scale_size(breaks = c(9,12,15,21),labels = c(9,12,15,21), range =c(10,15), name = "Length")+
+  scale_size(breaks = c(9,12,15,24),labels = c(9,12,15,24), range =c(10,15), name = "Length")+
   scale_fill_manual(values = c("#00441b","#41ab5d", "#c7e9c0"), name = "")+
   scale_colour_manual(values = c("#969696","#8c510a"), name = "Strand",
                       labels = c("direct", "compliment"))+
