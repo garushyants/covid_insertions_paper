@@ -1,0 +1,44 @@
+>  21479 2 d >Bat_SARS_CoV_HKU31 0 29592 + 29592                         
+CTCCTCGGCGGG
+CTTCTCGTCGGG
+
+>  21479 2 d >Bat_SARS_CoV_HKU312 0 29568 + 29568                        
+CTCCTCGGCGGG
+CTTCTCGTCGGG
+
+>  21558 2 c >Bat_SARSlike_CoV_As6526 0 29603 + 29603                    
+CTCCTCGGCGGG
+CACCTCGACGGG
+
+>  21558 2 c >CoV_BtRsBetaCoV/YN2018C 0 29569 + 29569                    
+CTCCTCGGCGGG
+CACCTTGGCGGG
+
+>  26312 2 c >Bat_SARSlike_CoV_Rs4081 0 29648 + 29648                    
+CTCCTCGGCGGG
+CTCCTCGACGGA
+
+>  21560 2 c >Bat_SARSlike_CoV_Rs4237 0 29626 + 29626                    
+CTCCTCGGCGGG
+CACCTCGACGGG
+
+>  21560 2 c >Bat_SARSlike_CoV_Rs4247 0 29628 + 29628                    
+CTCCTCGGCGGG
+CACCTCGACGGG
+
+>  21563 2 c >CoV_BtRsBetaCoV/YN2018A 0 29583 + 29583                    
+CTCCTCGGCGGG
+CACCTCGACGGG
+
+>   2958 2 c >Bat_CoV_Cp/Yunnan2011 0 29348 + 29348                      
+CTCCTCGGCGGG
+TTCCTCGTCGGG
+
+>  14347 2 c >Bat_SARS_CoV_Rm1 0 29617 + 29617                           
+CTCCTCGGCGGG
+CTCGTAGGCGGG
+
+>  21464 2 d >BtRsBetaCoV/HuB2013 0 29521 + 29521                        
+CTCCTCGGCGGG
+CTCCTCTACGGG
+
